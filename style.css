@@ -47,4 +47,13 @@ button{
     font-size: 48px;
     font-weight: bold;
 }
-
+.name3{
+    align-items: center;
+    font-weight: bold;
+    font-size: 15px;
+    color: white;
+    font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+    display: flex;
+    justify-content: center;
+    padding-top: 584px;
+}
