@@ -44,12 +44,12 @@ this.position.x+=this.velocity.x
 }
 }
 }
-class Missile {
+class Projectile {
     constructor({position,velocity}){
         this.position=position
         this.velocity=velocity
 
-        this.radius=3
+        this.radius=4
     }
     draw() {
         c.beginPath()
@@ -106,7 +106,6 @@ class Grid{
             y:0
         }
         this.invaders=[]
-        
         const columns=Math.floor(Math.random()* 10+5)
         const rows=Math.floor(Math.random() * 5+2)
 
@@ -139,8 +138,8 @@ class Grid{
     }
     }
 const player=new Player()
-const missiles=[]
-const grids=[new Grid()]
+const projectiles=[]
+const grids=[]
 
 const keys={
     a:{
@@ -153,17 +152,50 @@ const keys={
         pressed :false
     }
 }
+let frames=0
+let randomInterval=Math.floor(Math.random()*500+500)
 function animate(){
     c.fillStyle='black'
     c.fillRect(0,0,canvas.width,canvas.height)
     player.update()
-missiles.forEach(missile => {
-    missile.update()
+    projectiles.forEach((projectile ,index) => {
+    if(projectile.position.y+ projectile.radius<=0){
+        setTimeout(() => {
+        projectiles.splice(index,1)
+    }, 0)
+   } else {
+    projectile.update()
+    }
 })
-grids.forEach((grid) => {
+grids.forEach((grid, gridIndex) => {
     grid.update()
-    grid.invaders.forEach((invader) => {
-        invader.update({velocity :grid.velocity})
+    grid.invaders.forEach((invader,i) => {
+        invader.update({velocity: grid.velocity})
+        projectiles.forEach((projectile,j) => {
+            if(
+                projectile.position.y-projectile.radius <=invader.position.y+invader.height &&
+                projectile.position.x+projectile.radius>=invader.position.x && projectile.position.x-projectile.radius<=invader.position.x+invader.width && projectile.position.y+ projectile.radius>=invader.position.y)
+            {
+                setTimeout (() => {
+                    const invaderFound =grid.invaders.find((invader2)=> invader2 ==invader)
+                    const projectileFound=projectiles.find((projectile2) => projectile2 ==projectile)
+                    if(invaderFound && projectileFound){
+                        grid.invaders.splice(i,1)
+                        projectiles.splice(j,1)
+
+                        if(grid.invaders.length >0){
+                            const firstInvader=grid.invaders[0]
+                            const lastInvader=grid.invaders[grid.invaders.length-1]
+
+                            grid.width=lastInvader.position.x-firstInvader.position.x+lastInvader.width
+                            grid.position.x=firstInvader.position.x
+                        }else{
+                            grids.splice(gridIndex,1)
+                        }
+                    }
+        },0)
+    }
+})
     })
 })
     if(keys.a.pressed && player.position.x >=0) {
@@ -177,22 +209,28 @@ grids.forEach((grid) => {
         player.rotation=0
     }
     requestAnimationFrame(animate);
+    if(frames%1000==0){
+        grids.push(new Grid)
+        randomInterval=Math.floor(Math.random()*500+500)
+        frames=0
+    }
+    frames++
 }
 animate()
 
 addEventListener('keydown',({key}) => {
     switch(key){
         case 'a':
-            console.log('left')
+            //console.log('left')
             keys.a.pressed=true
             break
         case 'd':
-            console.log('right')
+            //console.log('right')
             keys.d.pressed=true
             break
         case ' ':
-            console.log('space')
-            missiles.push(new Missile({
+            //console.log('space')
+            projectiles.push(new Projectile({
                 position: {
                     x: player.position.x + player.width/2,
                     y: player.position.y
@@ -208,15 +246,15 @@ addEventListener('keydown',({key}) => {
 addEventListener('keyup',({key}) => {
     switch(key){
         case 'a':
-            console.log('left')
+            //console.log('left')
             keys.a.pressed=false
             break
         case 'd':
-            console.log('right')
+            //console.log('right')
             keys.d.pressed=false
             break
         case ' ':
-            console.log('space')
+            //console.log('space')
             break
     }
 })
