@@ -1,5 +1,7 @@
 const canvas=document.getElementById("canvas")
 const c = canvas.getContext("2d")
+const scoreEl=document.getElementById('scoreEl')
+
 canvas.width=innerWidth
 canvas.height=innerHeight
 class Player{
@@ -9,6 +11,7 @@ class Player{
             y:0
         }
         this.rototion=0
+        this.opacity=1
         const image=new Image()
         image.src='spaceship.jpg'
         image.onload =() =>{
@@ -24,6 +27,7 @@ class Player{
     }
     draw(){
         c.save()
+        c.globalAlpha=this.opacity
         c.translate(
             player.position.x + player.width/2,
             player.position.y + player.height/2
@@ -66,7 +70,7 @@ class Projectile {
     }
 }
 class Particle {
-    constructor({position,velocity,radius,color}){
+    constructor({position,velocity,radius,color,fades}){
         this.position=position
         this.velocity=velocity
 
@@ -150,7 +154,7 @@ class Invader{
             },
             velocity : {
                 x:0,
-                y:5
+                y:10
             }
         })
       )
@@ -191,7 +195,6 @@ class Grid{
         this.position.y += this.velocity.y
          
         this.velocity.y=0
-        console.log(this.position.x );
         if(this.position.x+this.width>=canvas.width || this.position.x <=0) {
             this.velocity.x = -this.velocity.x
             this.velocity.y=30
@@ -216,7 +219,13 @@ const keys={
 }
 let frames=0
 let randomInterval=Math.floor(Math.random()*500+500)
-        function createParticles({object,color}){
+let game={
+    over: false,
+    active: true
+}
+let score=0
+        function createParticles({object,color,fades}){
+                        
             particles.splice(0,15)
            for(let i=0;i<15;i++)
                     {
@@ -230,18 +239,32 @@ let randomInterval=Math.floor(Math.random()*500+500)
                                 y:(Math.random()-0.5)*2
                             },
                             radius: Math.random()*3,
-                            color: color || 'yellow'
+                            color: color || 'yellow',
+                            fades
                         }))
                     }
 }
 
 function animate(){
+    if(!game.active)
+    {
+        c.font="50px Arial";
+        c.fillStyle="white";
+        c.fillText("Game Over!",(canvas.width/2)-127,(canvas.height/2)+3) 
+        return }
     requestAnimationFrame(animate);
     c.fillStyle='black'
     c.fillRect(0,0,canvas.width,canvas.height)
     player.update()
     particles.forEach((particle,i) => {
+        if(particle.opacity<=0){
+            setTimeout(() => {
+            particles.splice(i,1)
+        },0)
+    }
+        else{
         particle.update()
+        }
     })
     invaderProjectiles.forEach((invaderProjectile,index) => {
         if(invaderProjectile.position.y +invaderProjectile.height >=canvas.height){
@@ -254,10 +277,19 @@ function animate(){
             invaderProjectile.position.x <=player.position.x+player.width)
             {
                     invaderProjectiles.splice(index,1)
-                console.log("YOU LOSE")
+                    audiotrack(audio2);
+
+                setTimeout(() =>{
+                    invaderProjectiles.splice(index,1)
+                    player.opacity=true,
+                    game.over=true
+                },0)
+                setTimeout(() =>{
+                    game.active=false
+                },500)
                 createParticles({
                     object: player,
-                    color: 'white'
+                    color: 'white',
                 })
             }
         })
@@ -286,10 +318,11 @@ grids.forEach((grid, gridIndex) => {
                     const projectileFound=projectiles.find((projectile2) => projectile2 ==projectile)
 
                     if(invaderFound && projectileFound){
+                        score=score+1
+                        scoreEl.innerHTML = score
                         createParticles({
                             object:invader,
                         })
-    
                         grid.invaders.splice(i,1)
                         projectiles.splice(j,1)
 
@@ -328,6 +361,9 @@ grids.forEach((grid, gridIndex) => {
 animate()
 
 addEventListener('keydown',({key}) => {
+
+    if(game.over)
+     return
     switch(key){
         case 'a':
             //console.log('left')
@@ -339,6 +375,7 @@ addEventListener('keydown',({key}) => {
             break
         case ' ':
             //console.log('space')
+            audiotrack(audio1);
             projectiles.push(new Projectile({
                 position: {
                     x: player.position.x + player.width/2,
@@ -367,3 +404,11 @@ addEventListener('keyup',({key}) => {
             break
     }
 })
+let audio1=new Audio();
+    let audio2=new Audio();
+    audio1.src="/shoot_audio.mp3";
+    audio2.src="/game_over.mp3";
+function audiotrack(aud){
+    aud.currentTime=0;
+    aud.play();
+}

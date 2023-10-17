@@ -3,9 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Space Invader</title>
-    <canvas id="canvas" width="1700" height="679" style="overflow:hidden;margin-top: -7px;"></canvas>
-    <script src="javascript.js"></script>
+    <title>Space Invader</title>  
+    <link rel="stylesheet" href="styles.css">
     <style>
         body{
             margin :0;
@@ -14,6 +13,12 @@
     </style>
 </head>
 <body>
-    
+    <p
+    style="position:fixed; z-index :10; color:white; left:20x; top:10px; margin:0; font-family: sans-serif;
+    font-size: 30px;">
+        <span>  Score :</span> <span id="scoreEl">0</span>
+    </p>
+    <canvas id="canvas" width="1700" height="679" style="overflow:hidden;margin-top: -7px;"></canvas>
+    <script src="javascript.js"></script>
 </body>
 </html>
