@@ -4,6 +4,14 @@ const scoreEl=document.getElementById('scoreEl')
 
 canvas.width=innerWidth
 canvas.height=innerHeight
+let audio1=new Audio();
+    let audio2=new Audio();
+    audio1.src="/assets/shoot_audio.mp3";
+    audio2.src="/assets/game_over.mp3";
+function audiotrack(aud){
+    aud.currentTime=0;
+    aud.play();
+}
 class Player{
     constructor(){
         this.velocity={
@@ -404,11 +412,4 @@ addEventListener('keyup',({key}) => {
             break
     }
 })
-let audio1=new Audio();
-    let audio2=new Audio();
-    audio1.src="/shoot_audio.mp3";
-    audio2.src="/game_over.mp3";
-function audiotrack(aud){
-    aud.currentTime=0;
-    aud.play();
-}
+
