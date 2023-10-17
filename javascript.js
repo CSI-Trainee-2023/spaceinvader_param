@@ -216,8 +216,8 @@ const keys={
 }
 let frames=0
 let randomInterval=Math.floor(Math.random()*500+500)
-particles.splice(0,15)
         function createParticles({object,color}){
+            particles.splice(0,15)
            for(let i=0;i<15;i++)
                     {
                    particles.push(new Particle({
@@ -241,28 +241,19 @@ function animate(){
     c.fillRect(0,0,canvas.width,canvas.height)
     player.update()
     particles.forEach((particle,i) => {
-        if(particle.opacity<=0){
-            setTimeout(() => {
-                particle.splice(i,1)
-            },0)
-        }else{
         particle.update()
-    }
     })
     invaderProjectiles.forEach((invaderProjectile,index) => {
         if(invaderProjectile.position.y +invaderProjectile.height >=canvas.height){
-          setTimeout(() => {
             invaderProjectiles.splice(index,1)
-            }, 0)
+            
         } else invaderProjectile.update()
 
         if(invaderProjectile.position.y + invaderProjectile.height>=player.position.y &&
             player.position.y && invaderProjectile.position.x + invaderProjectile.width>=player.position.x &&
             invaderProjectile.position.x <=player.position.x+player.width)
             {
-                setTimeout(() => {
                     invaderProjectiles.splice(index,1)
-                    }, 0)
                 console.log("YOU LOSE")
                 createParticles({
                     object: player,
@@ -272,10 +263,9 @@ function animate(){
         })
     projectiles.forEach((projectile ,index) => {
     if(projectile.position.y+ projectile.radius<=0){
-        setTimeout(() => {
         projectiles.splice(index,1)
-    }, 0)
-   } else {
+    }
+   else {
     projectile.update()
     }
 })
@@ -296,23 +286,10 @@ grids.forEach((grid, gridIndex) => {
                     const projectileFound=projectiles.find((projectile2) => projectile2 ==projectile)
 
                     if(invaderFound && projectileFound){
-                        particles.splice(0,15)
-                        for(let i=0;i<15;i++)
-                        {
-                       particles.push(new Particle({
-                          position:{
-                         x:invader.position.x+invader.width/2,
-                         y:invader.position.y+invader.height/2
-                                },
-                                velocity:{
-                                    x:(Math.random()-0.5)*2,
-                                    y:(Math.random()-0.5)*2
-                                },
-                                radius: Math.random()*3,
-                                color: 'yellow'
-                            }))
-                        }
-
+                        createParticles({
+                            object:invader,
+                        })
+    
                         grid.invaders.splice(i,1)
                         projectiles.splice(j,1)
 
