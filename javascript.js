@@ -85,6 +85,7 @@ class Particle {
         this.radius=radius
         this.color=color
         this.opacity=1
+        this.fades=fades
     }
     draw() {
         c.save()
@@ -101,6 +102,8 @@ class Particle {
         this.draw()
         this.position.x +=this.velocity.x
         this.position.y +=this.velocity.y
+
+        if(this.fades)
         this.opacity -=0.01
     }
 }
@@ -109,11 +112,11 @@ class InvaderProjectile {
         this.position=position
         this.velocity=velocity
 
-        this.width=3
+        this.width=5
         this.height=10
     }
     draw() {
-        c.fillStyle='white'
+        c.fillStyle='#0FFF50'
         c.fillRect(this.position.x,this.position.y,this.width,this.height)
     }
 
@@ -162,7 +165,7 @@ class Invader{
             },
             velocity : {
                 x:0,
-                y:10
+                y:14
             }
         })
       )
@@ -214,6 +217,7 @@ const projectiles=[]
 const grids=[]
 const invaderProjectiles=[]
 const particles=[]
+const stars=[]
 const keys={
     a:{
         pressed :false
@@ -232,9 +236,26 @@ let game={
     active: true
 }
 let score=0
-        function createParticles({object,color,fades}){
-                        
-            particles.splice(0,15)
+
+   for(let i=0;i<100;i++)
+            {
+           stars.push(new Particle({
+              position:{
+             x:Math.random()*canvas.width,
+             y:Math.random()*canvas.height
+                    },
+                    velocity:{
+                        x:0,
+                        y:0.4
+                    },
+                    radius: Math.random()*3,
+                    color: 'white'
+                }))
+            }
+
+
+        function createParticles({object,color,fades}){              
+            particles.splice(0,5)
            for(let i=0;i<15;i++)
                     {
                    particles.push(new Particle({
@@ -265,6 +286,7 @@ function animate(){
     c.fillRect(0,0,canvas.width,canvas.height)
     player.update()
     particles.forEach((particle,i) => {
+
         if(particle.opacity<=0){
             setTimeout(() => {
             particles.splice(i,1)
@@ -274,6 +296,22 @@ function animate(){
         particle.update()
         }
     })
+    stars.forEach((particle,i) => {
+        if(particle.position.y-particle.radius>=canvas.height)
+        {
+            particle.position.x=Math.random()*canvas.width
+            particle.position.y=-particle.radius
+        }
+        if(particle.opacity<=0){
+            setTimeout(() => {
+            stars.splice(i,1)
+        },0)
+    }
+        else{
+        particle.update()
+        }
+    })
+
     invaderProjectiles.forEach((invaderProjectile,index) => {
         if(invaderProjectile.position.y +invaderProjectile.height >=canvas.height){
             invaderProjectiles.splice(index,1)
@@ -298,6 +336,7 @@ function animate(){
                 createParticles({
                     object: player,
                     color: 'white',
+                    fades:true
                 })
             }
         })
@@ -330,6 +369,7 @@ grids.forEach((grid, gridIndex) => {
                         scoreEl.innerHTML = score
                         createParticles({
                             object:invader,
+                            fades:true
                         })
                         grid.invaders.splice(i,1)
                         projectiles.splice(j,1)
