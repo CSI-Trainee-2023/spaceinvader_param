@@ -1,17 +1,22 @@
 const canvas=document.getElementById("canvas")
 const c = canvas.getContext("2d")
+//Linking score variable
 const scoreEl=document.getElementById('scoreEl')
-
+const playAgain = document.getElementById('playit')
+//                    
 canvas.width=innerWidth
 canvas.height=innerHeight
-let audio1=new Audio();
+
+//Adding audio to explosions
+    let audio1=new Audio();
     let audio2=new Audio();
     audio1.src="/assets/shoot_audio.mp3";
     audio2.src="/assets/game_over.mp3";
-function audiotrack(aud){
+    function audiotrack(aud){
     aud.currentTime=0;
     aud.play();
-}
+      }
+
 class Player{
     constructor(){
         this.velocity={
@@ -24,6 +29,7 @@ class Player{
         image.src='spaceship.jpg'
         image.onload =() =>{
             const scale=0.15;
+            //To resize the image of spaceship
         this.image=image
         this.width=image.width*scale
         this.height=image.height*scale
@@ -135,10 +141,9 @@ class Invader{
         const image=new Image()
         image.src='invader.jpg'
         image.onload =() =>{
-            const scale=1;
         this.image=image
-        this.width=image.width*scale
-        this.height=image.height*scale
+        this.width=image.width
+        this.height=image.height
         this.position={
             x: position.x,
             y: position.y
@@ -178,7 +183,7 @@ class Grid{
             y:0
         }
         this.velocity={
-            x:3,
+            x:4,
             y:0
         }
         this.invaders=[]
@@ -198,13 +203,12 @@ class Grid{
                 })
             )
         }
-    }
-        
+    }     
     }
     update(){
         this.position.x += this.velocity.x
         this.position.y += this.velocity.y
-         
+
         this.velocity.y=0
         if(this.position.x+this.width>=canvas.width || this.position.x <=0) {
             this.velocity.x = -this.velocity.x
@@ -212,6 +216,7 @@ class Grid{
         }
     }
     }
+
 const player=new Player()
 const projectiles=[]
 const grids=[]
@@ -236,11 +241,11 @@ let game={
     active: true
 }
 let score=0
-
-   for(let i=0;i<100;i++)
+let f=0
+        for(let i=0;i<100;i++)
             {
            stars.push(new Particle({
-              position:{
+            position:{
              x:Math.random()*canvas.width,
              y:Math.random()*canvas.height
                     },
@@ -254,8 +259,9 @@ let score=0
             }
 
 
-        function createParticles({object,color,fades}){              
-            particles.splice(0,5)
+        function createParticles({object,color,fades}){   
+            //Used for experience           
+        particles.splice(0,15)
            for(let i=0;i<15;i++)
                     {
                    particles.push(new Particle({
@@ -272,30 +278,23 @@ let score=0
                             fades
                         }))
                     }
-}
+                }
 
 function animate(){
     if(!game.active)
     {
-        c.font="50px Arial";
+        //this block executes when game is over
+        c.font="bold 67px Arial";
         c.fillStyle="white";
-        c.fillText("Game Over!",(canvas.width/2)-127,(canvas.height/2)+3) 
-        return }
+        c.fillText("Game Over!",(canvas.width/2)-195,(canvas.height/2)+3) 
+        playAgain.classList.add('playAgain')
+        playAgain.classList.remove('hidden')
+        console.log('game over');
+        return 
+    }
     requestAnimationFrame(animate);
     c.fillStyle='black'
     c.fillRect(0,0,canvas.width,canvas.height)
-    player.update()
-    particles.forEach((particle,i) => {
-
-        if(particle.opacity<=0){
-            setTimeout(() => {
-            particles.splice(i,1)
-        },0)
-    }
-        else{
-        particle.update()
-        }
-    })
     stars.forEach((particle,i) => {
         if(particle.position.y-particle.radius>=canvas.height)
         {
@@ -311,6 +310,18 @@ function animate(){
         particle.update()
         }
     })
+    player.update()
+    particles.forEach((particle,i) => {
+    
+        if(particle.opacity<=0){
+            setTimeout(() => {
+            particles.splice(i,1)
+        },0)
+    }
+        else{
+        particle.update()
+        }
+    })
 
     invaderProjectiles.forEach((invaderProjectile,index) => {
         if(invaderProjectile.position.y +invaderProjectile.height >=canvas.height){
@@ -318,13 +329,12 @@ function animate(){
             
         } else invaderProjectile.update()
 
-        if(invaderProjectile.position.y + invaderProjectile.height>=player.position.y &&
-            player.position.y && invaderProjectile.position.x + invaderProjectile.width>=player.position.x &&
+        if(invaderProjectile.position.y + invaderProjectile.height>= player.position.y && invaderProjectile.position.x + invaderProjectile.width>=player.position.x &&
             invaderProjectile.position.x <=player.position.x+player.width)
             {
-                    invaderProjectiles.splice(index,1)
-                    audiotrack(audio2);
-
+                invaderProjectiles.splice(index,1)
+                audiotrack(audio2);
+                //Audio for game over
                 setTimeout(() =>{
                     invaderProjectiles.splice(index,1)
                     player.opacity=true,
@@ -332,12 +342,12 @@ function animate(){
                 },0)
                 setTimeout(() =>{
                     game.active=false
-                },500)
+                },500) //For Pausing the Game
                 createParticles({
                     object: player,
                     color: 'white',
                     fades:true
-                })
+                })//For Transarent animation
             }
         })
     projectiles.forEach((projectile ,index) => {
@@ -357,10 +367,12 @@ grids.forEach((grid, gridIndex) => {
         invader.update({velocity: grid.velocity})
         projectiles.forEach((projectile,j) => {
             if(
+                //For the proper collision
                 projectile.position.y-projectile.radius <=invader.position.y+invader.height &&
                 projectile.position.x+projectile.radius>=invader.position.x && projectile.position.x-projectile.radius<=invader.position.x+invader.width && projectile.position.y+ projectile.radius>=invader.position.y)         
             {  
                 setTimeout (() => {
+                    //To check for the collison
                     const invaderFound =grid.invaders.find((invader2)=> invader2 ==invader)
                     const projectileFound=projectiles.find((projectile2) => projectile2 ==projectile)
 
